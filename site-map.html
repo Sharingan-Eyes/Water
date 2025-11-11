@@ -1,0 +1,168 @@
+<html>
+
+<head>
+    <title>Site Map</title>
+    <style>
+        .sitemap-navigation {
+            display: inline-block;
+            width: 1200px;
+            max-width: 100%;
+            overflow: hidden;
+            padding: 0;
+        }
+
+        .sitemap-navigation ul,
+        .sitemap-navigation li {
+            list-style: none;
+            margin: 0;
+            padding: 0;
+            position: relative;
+        }
+
+        .sitemap-navigation a {
+            display: inline-block;
+            /* Put all this in a media query. Don't forget to style a simple mobile version */
+        }
+
+        .sitemap-navigation .menu-item::before,
+        .sitemap-navigation>.menu-item-has-children>.sub-menu::before {
+            content: '';
+            display: block;
+            position: relative;
+            left: 50%;
+            margin-left: -2px;
+            width: 100%;
+            border-left: #4088c1 solid 4px;
+            height: 2em;
+        }
+
+        .sitemap-navigation>.menu-item-has-children::before {
+            display: none;
+        }
+
+        .sitemap-navigation>.menu-item-has-children>.sub-menu {
+            display: flex;
+            justify-content: space-between;
+            border-top: #4088c1 solid 4px;
+            margin-top: 2em;
+        }
+
+        .sitemap-navigation>.menu-item-has-children>.sub-menu::before {
+            position: absolute;
+            top: -2em;
+            margin-top: -4px;
+        }
+
+        .sitemap-navigation>.menu-item-has-children>.sub-menu>.menu-item {
+            flex: 1 0 auto;
+            margin-top: -4px;
+            padding-left: 1em;
+            padding-right: 1em;
+        }
+
+        .sitemap-navigation>.menu-item-has-children>.sub-menu>.menu-item:first-child::before,
+        .sitemap-navigation>.menu-item-has-children>.sub-menu>.menu-item:last-child::before {
+            background: #fefeff;
+        }
+
+        .sitemap-navigation>.menu-item-has-children>.sub-menu>.menu-item:first-child::before {
+            left: auto;
+            right: 50%;
+            width: 100%;
+            border-left: none;
+            border-right: #4088c1 solid 4px;
+        }
+
+        body {
+            background: #fefeff;
+        }
+
+        .sitemap-wrapper {
+            padding: 2rem;
+            text-align: center;
+        }
+
+        .sitemap-navigation a {
+            background: #69dccd;
+            border-radius: 0.25em;
+            color: white;
+            text-decoration: none;
+            padding: 1em;
+            transition: 0.25s;
+        }
+
+        .sitemap-navigation a:hover {
+            background: #04a4a2;
+        }
+
+        .sitemap-navigation>.menu-item-has-children>a {
+            background: #f094a0;
+            font-size: 1.2rem;
+        }
+
+        .sitemap-navigation>.menu-item-has-children>a:hover {
+            background: #b45f77;
+        }
+
+        .sitemap-navigation>.menu-item-has-children>.sub-menu>.menu-item>a {
+            background: #f1dba6;
+            font-weight: 700;
+        }
+
+        .sitemap-navigation>.menu-item-has-children>.sub-menu>.menu-item>a:hover {
+            background: #c0a173;
+        }
+    </style>
+</head>
+
+<body>
+    <section class="sitemap-wrapper">
+        <ul id="menu-sitemap-menu" class="sitemap-navigation">
+            <li class="menu-item menu-item-has-children"><a href="">Home</a>
+                <ul class="sub-menu">
+                    <li class="menu-item menu-item-has-children"><a href="">ABOUT</a>
+                        <ul class="sub-menu">
+                            <li class="menu-item"><a href="">Mission and Vision</a></li>
+                            <li class="menu-item"><a href="">Board Of Directors</a></li>
+                            <li class="menu-item"><a href="">Our Team</a></li>
+                            <li class="menu-item"><a href="">Financials</a></li>
+                        </ul>
+                    </li>
+                    <li class="menu-item menu-item-has-children"><a href="">PROGRAMS</a>
+                        <ul class="sub-menu">
+                            <li class="menu-item"><a href="">Warrior Guest Stays</a></li>
+                            <li class="menu-item"><a href="">Warrior Outreach</a></li>
+                            <li class="menu-item"><a href="">Visiting Chefs Program</a></li>
+                            <li class="menu-item"><a href="">Student Leadership Challenge</a></li>
+                            <li class="menu-item"><a href="">Operation Save the Number</a></li>
+                            <li class="menu-item"><a href="">Veterans' Education</a></li>
+                            <li class="menu-item"><a href="">Moral Injury</a></li>
+                        </ul>
+                    </li>
+                    <li class="menu-item menu-item-has-children"><a href="">CALL TO ACTION</a>
+                        <ul class="sub-menu">
+                            <li class="menu-item"><a href="">In the Community</a></li>
+                            <li class="menu-item"><a href="">Vettes for Willing Warriors</a></li>
+                            <li class="menu-item"><a href="">Warrior Ride</a></li>
+                            <li class="menu-item"><a href="">Gala</a></li>
+                        </ul>
+                    </li>
+                    <li class="menu-item menu-item-has-children"><a href="">MEDIA</a>
+                        <ul class="sub-menu">
+                            <li class="menu-item"><a href="">Podcasts</a></li>
+                            <li class="menu-item"><a href="">Newsletter</a></li>
+                            <li class="menu-item"><a href="">Social Media</a></li>
+                            <li class="menu-item"><a href="">Media Kit</a></li>
+                            <li class="menu-item"><a href="">Photos</a></li>
+                            <li class="menu-item"><a href="">Testimonials</a></li>
+                        </ul>
+                    </li>
+                    <li class="menu-item"><a href="">CONTACT</a></li>
+                </ul>
+            </li>
+        </ul>
+    </section>
+
+</body>
+
+</html>
