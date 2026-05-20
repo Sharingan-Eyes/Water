@@ -1,0 +1,473 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Windows Style Audio Player</title>
+    <style>
+      :root {
+        --bg-1: #0c1022;
+        --bg-2: #151a32;
+        --panel: #1b2242;
+        --line: #2e3966;
+        --text: #e8ecff;
+        --muted: #b1bbdf;
+        --accent: #4aa2ff;
+        --accent-2: #8a79ff;
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+
+      body {
+        margin: 0;
+        min-height: 100vh;
+        font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+        color: var(--text);
+        background: radial-gradient(circle at 20% 20%, #212c5f, var(--bg-1) 60%),
+          linear-gradient(160deg, var(--bg-2), var(--bg-1));
+        display: grid;
+        place-items: center;
+        padding: 16px;
+      }
+
+      .player {
+        width: min(900px, 100%);
+        background: linear-gradient(180deg, #1f2852, #171f40);
+        border: 1px solid var(--line);
+        border-radius: 14px;
+        box-shadow: 0 16px 40px rgba(0, 0, 0, 0.45);
+        overflow: hidden;
+      }
+
+      .titlebar {
+        background: linear-gradient(90deg, #2d5fc0, #4f4dcf);
+        padding: 10px 14px;
+        font-weight: 700;
+        letter-spacing: 0.2px;
+      }
+
+      .content {
+        display: grid;
+        grid-template-columns: 1.15fr 1fr;
+        gap: 14px;
+        padding: 14px;
+      }
+
+      .panel {
+        background: var(--panel);
+        border: 1px solid var(--line);
+        border-radius: 10px;
+      }
+
+      .now-playing {
+        padding: 14px;
+        display: grid;
+        gap: 10px;
+      }
+
+      .meta-label {
+        color: var(--muted);
+        font-size: 12px;
+        text-transform: uppercase;
+        letter-spacing: 1.1px;
+      }
+
+      .track-title {
+        font-size: 22px;
+        font-weight: 700;
+        min-height: 32px;
+        line-height: 1.2;
+      }
+
+      .track-sub {
+        color: var(--muted);
+        font-size: 14px;
+        min-height: 20px;
+      }
+
+      .progress-wrap {
+        margin-top: 8px;
+      }
+
+      .time-row {
+        display: flex;
+        justify-content: space-between;
+        color: var(--muted);
+        font-size: 12px;
+        margin-bottom: 6px;
+      }
+
+      input[type="range"] {
+        width: 100%;
+        accent-color: var(--accent);
+      }
+
+      .controls {
+        margin-top: 8px;
+        display: grid;
+        grid-template-columns: repeat(5, auto) 1fr auto;
+        gap: 8px;
+        align-items: center;
+      }
+
+      button {
+        border: 1px solid #3c4b86;
+        color: var(--text);
+        background: linear-gradient(180deg, #29366d, #1f2854);
+        border-radius: 8px;
+        padding: 8px 10px;
+        min-width: 44px;
+        cursor: pointer;
+        font-weight: 600;
+      }
+
+      button:hover {
+        filter: brightness(1.08);
+      }
+
+      button:active {
+        transform: translateY(1px);
+      }
+
+      .toggle-on {
+        border-color: #67b2ff;
+        box-shadow: inset 0 0 0 1px #67b2ff;
+      }
+
+      .volume-wrap {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        min-width: 180px;
+      }
+
+      .playlist {
+        display: grid;
+        grid-template-rows: auto 1fr auto;
+        min-height: 320px;
+      }
+
+      .playlist-header {
+        padding: 12px;
+        border-bottom: 1px solid var(--line);
+        font-weight: 700;
+      }
+
+      .tracks {
+        margin: 0;
+        padding: 8px;
+        list-style: none;
+        overflow: auto;
+        max-height: 360px;
+      }
+
+      .track-item {
+        display: grid;
+        grid-template-columns: 24px 1fr;
+        gap: 8px;
+        align-items: center;
+        padding: 8px 10px;
+        border-radius: 8px;
+        cursor: pointer;
+      }
+
+      .track-item:hover {
+        background: #24305e;
+      }
+
+      .track-item.active {
+        background: linear-gradient(90deg, rgba(74, 162, 255, 0.25), rgba(138, 121, 255, 0.25));
+        border: 1px solid #4d78cc;
+      }
+
+      .track-index {
+        color: var(--muted);
+        font-size: 12px;
+      }
+
+      .playlist-footer {
+        border-top: 1px solid var(--line);
+        padding: 10px;
+        display: flex;
+        gap: 8px;
+      }
+
+      .playlist-footer button {
+        flex: 1;
+      }
+
+      .status {
+        color: var(--muted);
+        font-size: 12px;
+        margin-top: 4px;
+      }
+
+      @media (max-width: 840px) {
+        .content {
+          grid-template-columns: 1fr;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="player" role="application" aria-label="Windows style audio player">
+      <div class="titlebar">Windows Style Audio Player</div>
+
+      <div class="content">
+        <section class="panel now-playing">
+          <div class="meta-label">Now Playing</div>
+          <div class="track-title" id="trackTitle">No track selected</div>
+          <div class="track-sub" id="trackSub">Load audio files to start</div>
+
+          <div class="progress-wrap">
+            <div class="time-row">
+              <span id="currentTime">00:00</span>
+              <span id="duration">00:00</span>
+            </div>
+            <input id="seekBar" type="range" min="0" max="100" value="0" />
+          </div>
+
+          <div class="controls">
+            <button id="prevBtn" type="button" title="Previous">⏮</button>
+            <button id="playBtn" type="button" title="Play/Pause">▶</button>
+            <button id="nextBtn" type="button" title="Next">⏭</button>
+            <button id="stopBtn" type="button" title="Stop">⏹</button>
+            <button id="repeatBtn" type="button" title="Repeat">🔁</button>
+
+            <div></div>
+
+            <div class="volume-wrap">
+              <span>🔊</span>
+              <input id="volumeBar" type="range" min="0" max="1" step="0.01" value="0.8" />
+            </div>
+          </div>
+
+          <div class="status" id="statusText">Tip: Click "Load Files" and choose audio files.</div>
+        </section>
+
+        <section class="panel playlist">
+          <div class="playlist-header">Playlist</div>
+          <ol class="tracks" id="trackList"></ol>
+          <div class="playlist-footer">
+            <button id="loadBtn" type="button">Load Files</button>
+            <button id="clearBtn" type="button">Clear</button>
+          </div>
+        </section>
+      </div>
+    </div>
+
+    <audio id="audio"></audio>
+    <input id="fileInput" type="file" accept="audio/*" multiple hidden />
+
+    <script>
+      const audio = document.getElementById("audio");
+      const fileInput = document.getElementById("fileInput");
+      const trackListEl = document.getElementById("trackList");
+      const trackTitleEl = document.getElementById("trackTitle");
+      const trackSubEl = document.getElementById("trackSub");
+      const currentTimeEl = document.getElementById("currentTime");
+      const durationEl = document.getElementById("duration");
+      const seekBar = document.getElementById("seekBar");
+      const volumeBar = document.getElementById("volumeBar");
+      const statusText = document.getElementById("statusText");
+      const repeatBtn = document.getElementById("repeatBtn");
+
+      const playBtn = document.getElementById("playBtn");
+      const prevBtn = document.getElementById("prevBtn");
+      const nextBtn = document.getElementById("nextBtn");
+      const stopBtn = document.getElementById("stopBtn");
+      const loadBtn = document.getElementById("loadBtn");
+      const clearBtn = document.getElementById("clearBtn");
+
+      let playlist = [];
+      let currentIndex = -1;
+      let repeatOne = false;
+
+      function formatTime(seconds) {
+        if (!Number.isFinite(seconds)) return "00:00";
+        const mins = Math.floor(seconds / 60);
+        const secs = Math.floor(seconds % 60);
+        return `${String(mins).padStart(2, "0")}:${String(secs).padStart(2, "0")}`;
+      }
+
+      function getSafeName(fileName) {
+        return fileName.replace(/\.[^.]+$/, "");
+      }
+
+      function updateMeta() {
+        const current = playlist[currentIndex];
+        if (!current) {
+          trackTitleEl.textContent = "No track selected";
+          trackSubEl.textContent = "Load audio files to start";
+          currentTimeEl.textContent = "00:00";
+          durationEl.textContent = "00:00";
+          seekBar.value = 0;
+          renderPlaylist();
+          return;
+        }
+
+        trackTitleEl.textContent = getSafeName(current.file.name);
+        trackSubEl.textContent = `${current.file.type || "audio file"} • ${Math.round(current.file.size / 1024)} KB`;
+        renderPlaylist();
+      }
+
+      function loadTrack(index, autoPlay = false) {
+        if (index < 0 || index >= playlist.length) return;
+
+        currentIndex = index;
+        const item = playlist[currentIndex];
+        audio.src = item.url;
+        audio.load();
+        updateMeta();
+        statusText.textContent = `Loaded: ${item.file.name}`;
+
+        if (autoPlay) {
+          audio.play();
+        }
+      }
+
+      function playPause() {
+        if (!playlist.length) {
+          statusText.textContent = "No tracks in playlist.";
+          return;
+        }
+
+        if (currentIndex === -1) {
+          loadTrack(0, true);
+          return;
+        }
+
+        if (audio.paused) {
+          audio.play();
+        } else {
+          audio.pause();
+        }
+      }
+
+      function playNext(auto = false) {
+        if (!playlist.length) return;
+
+        if (currentIndex < playlist.length - 1) {
+          loadTrack(currentIndex + 1, true);
+        } else if (repeatOne) {
+          loadTrack(currentIndex, true);
+        } else if (auto) {
+          audio.pause();
+          audio.currentTime = 0;
+        } else {
+          loadTrack(0, true);
+        }
+      }
+
+      function playPrev() {
+        if (!playlist.length) return;
+        if (audio.currentTime > 3) {
+          audio.currentTime = 0;
+          return;
+        }
+        const prev = currentIndex > 0 ? currentIndex - 1 : playlist.length - 1;
+        loadTrack(prev, true);
+      }
+
+      function stopTrack() {
+        audio.pause();
+        audio.currentTime = 0;
+      }
+
+      function renderPlaylist() {
+        trackListEl.innerHTML = "";
+        playlist.forEach((item, index) => {
+          const li = document.createElement("li");
+          li.className = "track-item";
+          if (index === currentIndex) li.classList.add("active");
+          li.innerHTML = `
+            <span class="track-index">${String(index + 1).padStart(2, "0")}</span>
+            <span title="${item.file.name}">${item.file.name}</span>
+          `;
+          li.addEventListener("click", () => loadTrack(index, true));
+          trackListEl.appendChild(li);
+        });
+      }
+
+      function releaseUrls() {
+        playlist.forEach((entry) => URL.revokeObjectURL(entry.url));
+      }
+
+      loadBtn.addEventListener("click", () => fileInput.click());
+
+      clearBtn.addEventListener("click", () => {
+        audio.pause();
+        audio.removeAttribute("src");
+        releaseUrls();
+        playlist = [];
+        currentIndex = -1;
+        updateMeta();
+        statusText.textContent = "Playlist cleared.";
+      });
+
+      fileInput.addEventListener("change", (event) => {
+        const files = Array.from(event.target.files || []);
+        if (!files.length) return;
+
+        releaseUrls();
+        playlist = files.map((file) => ({
+          file,
+          url: URL.createObjectURL(file),
+        }));
+        currentIndex = -1;
+        renderPlaylist();
+        loadTrack(0, false);
+        statusText.textContent = `Loaded ${playlist.length} track(s).`;
+      });
+
+      playBtn.addEventListener("click", playPause);
+      nextBtn.addEventListener("click", () => playNext(false));
+      prevBtn.addEventListener("click", playPrev);
+      stopBtn.addEventListener("click", stopTrack);
+
+      repeatBtn.addEventListener("click", () => {
+        repeatOne = !repeatOne;
+        repeatBtn.classList.toggle("toggle-on", repeatOne);
+      });
+
+      volumeBar.addEventListener("input", () => {
+        audio.volume = Number(volumeBar.value);
+      });
+
+      seekBar.addEventListener("input", () => {
+        if (!audio.duration) return;
+        const value = Number(seekBar.value);
+        audio.currentTime = (value / 100) * audio.duration;
+      });
+
+      audio.addEventListener("timeupdate", () => {
+        currentTimeEl.textContent = formatTime(audio.currentTime);
+        durationEl.textContent = formatTime(audio.duration);
+        if (audio.duration) {
+          seekBar.value = String((audio.currentTime / audio.duration) * 100);
+        }
+      });
+
+      audio.addEventListener("play", () => {
+        playBtn.textContent = "⏸";
+      });
+
+      audio.addEventListener("pause", () => {
+        playBtn.textContent = "▶";
+      });
+
+      audio.addEventListener("ended", () => {
+        if (repeatOne) {
+          loadTrack(currentIndex, true);
+          return;
+        }
+        playNext(true);
+      });
+
+      audio.volume = Number(volumeBar.value);
+      updateMeta();
+    </script>
+  </body>
+</html>
